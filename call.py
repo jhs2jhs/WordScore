@@ -82,7 +82,7 @@ def output_score_close(fs):
     
 
 ## pair: bounday crossing
-def pair(pair_file_path):
+def pair(pair_file_path, fields, looks, r, first_line_as_label_pair):
     print '**** start to pair ****'
     i = 0
     f = open(pair_file_path, 'r')

@@ -51,7 +51,7 @@ import call
 r = call.get_scores(liwc_path, txt_path, first_line_as_lable, tid_column, tid_limit, fields, looks, show)
 call.output(fields, looks, r, output_result)
 
-lines_out = call.pair(pair_file_path)
+lines_out = call.pair(pair_file_path, fields, looks, r, first_line_as_label_pair)
 call.pair_output(lines_out, pair_file_path)
     
     
