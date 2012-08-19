@@ -5,6 +5,7 @@ import json
 
 ## method to get score for each field in your txt files
 def get_scores(liwc_path, txt_path, first_line_as_lable, tid_column, tid_limit, fields, looks, show):
+    print '**** start to calculate the score ****'
     cat, dic = liwc.read_liwc(liwc_path)
     looks_ws = liwc.get_wordsets(dic, looks)
     i = 0
@@ -36,15 +37,19 @@ def get_scores(liwc_path, txt_path, first_line_as_lable, tid_column, tid_limit, 
             print json.dumps(r[tid], sort_keys=True, indent=2) # pretty print data
             print '================'
         # now need to print results well, show results in good format, etc
+    f.close()
+    print 'end of start to calculate the score ****'
     return r
 
 
 ## output process results into a local txt file. 
 def output(fields, looks, r, output_result):
     if output_result == True:
+        print '**** start to output score ****'
         fs = output_score_open(fields, looks)
         output_score_process(r, fs, fields, looks)
         output_score_close(fs)
+        print '**** end of output score ****'
 
 def output_score_open(fields, looks):
     fs = {}
@@ -75,5 +80,89 @@ def output_score_close(fs):
     for f in fs:
         fs[f].close()
     
+
+## pair: bounday crossing
+def pair(pair_file_path):
+    print '**** start to pair ****'
+    i = 0
+    f = open(pair_file_path, 'r')
+    lines_out = {}
+    line_one = ''
+    for field_key in fields:
+        line_one = '%s \t%s_words_count '%(line_one, field_key)
+        for look in looks:
+            line_one = '%s \t%s_%s '%(line_one, field_key, look)
+    line_one = 'objectA %s \tobjectB %s '%(line_one, line_one)
+    while 1:
+        i = i+1
+        line = f.readline()
+        if not line:
+            break
+        if first_line_as_label_pair:
+            if i == 1:
+                line_one = '%s \t%s \n'%(line_one, line.strip())
+                continue
+        txt = line.split('\t')
+        tid = txt[i]
+        a = txt[0] # from a -> b
+        b = txt[1]
+        line_out = ''
+        ## for object a
+        tid = '/thing:%s'%(str(a))
+        line_out = '%s '%(tid)
+        if not r.has_key(tid):
+            for field_key in fields:
+                words_count = 'None'
+                line_out = '%s \t%s '%(line_out, words_count)
+                for look in looks:
+                    score = 'None'
+                    line_out = '%s \t%s '%(line_out, str(score))
+        else:
+            for field_key in fields:
+                words_count = r[tid][field_key]['words_count']
+                scores = r[tid][field_key]['score']
+                line_out = '%s \t%s '%(line_out, words_count)
+                for look in looks:
+                    score = scores[look]
+                    line_out = '%s \t%s '%(line_out, str(score))
+        ## for object b
+        tid = '/thing:%s'%(str(b))
+        line_out = '%s \t%s'%(line_out, tid)
+        if not r.has_key(tid):
+            for field_key in fields:
+                words_count = 'None'
+                line_out = '%s \t%s '%(line_out, words_count)
+                for look in looks:
+                    score = 'None'
+                    line_out = '%s \t%s '%(line_out, str(score))
+        else:
+            for field_key in fields:
+                tid = '/thing:%s'%(str(b))
+                words_count = r[tid][field_key]['words_count']
+                scores = r[tid][field_key]['score']
+                line_out = '%s \t%s '%(line_out, words_count)
+                for look in looks:
+                    score = scores[look]
+                    line_out = '%s \t%s'%(line_out, str(score))
+        ## append rest existing info
+        line_out = '%s \t%s \n'%(line_out, line.strip())
+        lines_out[i] = line_out
+        lines_out[0] = line_one
+    print '**** end of pare ****'
+    return lines_out
+
+def pair_output(lines_out, pair_file_path):
+    print '**** start to output pair ****'
+    line_one = ''
+    f_out_name = pair_file_path.replace('/', '')
+    f_out = 'output/pair_%s'%f_out_name
+    f = open(f_out, 'w')
+    for i in lines_out:
+        line = '%s \t%s'%(str(i), lines_out[i])
+        if pair_show:
+            print line
+        f.write(line)
+    f.close()
+    print '**** end of output pair ****'
     
     
