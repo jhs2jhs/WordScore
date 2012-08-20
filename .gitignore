@@ -33,4 +33,5 @@ pip-log.txt
 dic/*
 txt/*
 output/*
+sql/*
 screenshot/*

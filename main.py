@@ -33,7 +33,7 @@ looks = {
     }
 
 ## do you want to show the process during executing code
-show = False
+show = True
 
 ## do you want to save results into txt file in /ouput folder?
 output_result = True
