@@ -31,7 +31,7 @@ def things_sql(things):
 
 # file downloads
 sql_files = '''
-SELECT thing_id, COUNT(download) AS files_sum, SUM(download) AS downloads_sum 
+SELECT thing_id, COUNT(download_count) AS files_sum, SUM(download_count) AS downloads_sum 
 FROM file GROUP BY thing_id
 '''
 def files(things):
@@ -85,6 +85,18 @@ def mades(things):
 
 def together(r, things):
     for thing_id in things:
+        if things[thing_id].has_key('created_time'):
+            thing_create = things[thing_id]['created_time']
+        else:
+            thing_create = ''
+        if things[thing_id].has_key('files'):
+            thing_files = things[thing_id]['files']
+        else:
+            thing_files = 0
+        if things[thing_id].has_key('downloads'):
+            thing_downloads = things[thing_id]['downloads']
+        else:
+            thing_downloads = 0
         if things[thing_id].has_key('likes'):
             thing_likes = things[thing_id]['likes']
         else:
@@ -94,6 +106,9 @@ def together(r, things):
         else:
             thing_mades = 0
         thing_url = things[thing_id]['url'].strip()
+        r[thing_url]['created_time'] = thing_create
+        r[thing_url]['files'] = thing_files
+        r[thing_url]['downloads'] = thing_downloads
         r[thing_url]['likes'] = thing_likes
         r[thing_url]['mades'] = thing_mades
     return r
@@ -125,15 +140,15 @@ def output_score_process(r, fs, fields, looks):
             if r[tid].has_key('created_time'):
                 thing_create = r[tid]['created_time']
             else:
-                thing_create = ''
+                thing_create = 'Unknown'
             if r[tid].has_key('files'):
                 thing_files = r[tid]['files']
             else:
-                thing_files = ''
+                thing_files = '0'
             if r[tid].has_key('downloads'):
                 thing_downloads = r[tid]['downloads']
             else:
-                thing_downloads = ''
+                thing_downloads = '0'
             if r[tid].has_key('likes'):
                 thing_likes = r[tid]['likes']
             else:
@@ -159,6 +174,7 @@ def output_score_close(fs):
 if __name__ == '__main__':
     things = {}
     things = things_sql(things)
+    things = files(things)
     things = likes(things)
     things = mades(things)
     r = call.read_main(fields, looks)
