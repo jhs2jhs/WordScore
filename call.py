@@ -95,7 +95,9 @@ def pair(pair_file_path, fields, looks, r, first_line_as_label_pair):
     line_one = 'objectA %s \tobjectB %s '%(line_one, line_one)
     while 1:
         i = i+1
+        #print i
         line = f.readline()
+        #print line
         if not line:
             break
         if first_line_as_label_pair:
@@ -103,7 +105,7 @@ def pair(pair_file_path, fields, looks, r, first_line_as_label_pair):
                 line_one = '%s \t%s \n'%(line_one, line.strip())
                 continue
         txt = line.split('\t')
-        tid = txt[i]
+        #tid = txt[i]
         a = txt[0] # from a -> b
         b = txt[1]
         line_out = ''
