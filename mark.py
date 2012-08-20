@@ -1,15 +1,17 @@
+## configuration
+sql_path = 'sql/thingiver.db'
+
+
+#### do not edit bellow this line
 import sqlite3
 import json
 import call
 from main import *
 
-sql_path = 'sql/thingiver.db'
 conn = sqlite3.connect(sql_path)
 
-#things = {}
-
 # things
-sql_things = 'SELECT id, url, name FROM thing'
+sql_things = 'SELECT id, url, name, created_time FROM thing'
 def things_sql(things):
     c = conn.cursor()
     sql = sql_things
@@ -18,10 +20,32 @@ def things_sql(things):
         thing_id = row[0]
         thing_url = row[1]
         thing_title = row[2]
+        thing_create = row[3]
         if not things.has_key(thing_id):
             things[thing_id] = {}
         things[thing_id]['url'] = thing_url
         things[thing_id]['title'] = thing_title
+        things[thing_id]['created_time'] = thing_create
+    return things
+
+
+# file downloads
+sql_files = '''
+SELECT thing_id, COUNT(download) AS files_sum, SUM(download) AS downloads_sum 
+FROM file GROUP BY thing_id
+'''
+def files(things):
+    c = conn.cursor()
+    sql = sql_files
+    c.execute(sql, ())
+    for row in c.fetchall():
+        thing_id = row[0]
+        thing_files = row[1]
+        thing_downloads = row[2]
+        if not things.has_key(thing_id):
+            things[thing_id] = {}
+        things[thing_id]['files'] = thing_files
+        things[thing_id]['downloads'] = thing_downloads
     return things
 
 # likes
@@ -87,7 +111,7 @@ def output_score_open(fields, looks):
     for field_key in fields:
         f = open('output/mark_%s.txt'%field_key, 'w')
         fs[field_key] = f
-        line1 = 'tid \tlikes \tmades \twords_count '
+        line1 = 'tid \tcreated_time \tfiles_count \tfiles_downloads_total \tlikes \tmades \twords_count '
         for look in looks:
             line1 = '%s \t%s'%(line1, str(look))
         line1 = '%s\n'%line1
@@ -98,6 +122,18 @@ def output_score_process(r, fs, fields, looks):
     for tid in r:
         for field_key in fields:
             f = fs[field_key]
+            if r[tid].has_key('created_time'):
+                thing_create = r[tid]['created_time']
+            else:
+                thing_create = ''
+            if r[tid].has_key('files'):
+                thing_files = r[tid]['files']
+            else:
+                thing_files = ''
+            if r[tid].has_key('downloads'):
+                thing_downloads = r[tid]['downloads']
+            else:
+                thing_downloads = ''
             if r[tid].has_key('likes'):
                 thing_likes = r[tid]['likes']
             else:
@@ -108,7 +144,7 @@ def output_score_process(r, fs, fields, looks):
                 thing_mades = '0'
             words_count = r[tid][field_key]['words_count']
             scores = r[tid][field_key]['score']
-            line = '%s \t%s \t%s \t%s '%(tid, thing_likes, thing_mades, words_count)
+            line = '%s \t%s \t%s \t%s \t%s \t%s \t%s '%(tid, thing_create, thing_files, thing_downloads, thing_likes, thing_mades, words_count)
             for look in looks:
                 score = scores[look]
                 line = '%s \t%s'%(line, str(score))
