@@ -20,15 +20,19 @@ def get_scores(liwc_path, txt_path, first_line_as_lable, tid_column, tid_limit, 
                 i = i+1
                 continue
         txt = line.split('\t')
-        tid = txt[tid_column]
+        tid = txt[tid_column].strip()
         tid = str(tid) # dict needs key to be string, not integer
         if len(tid_limit) != 0: # if only look for specific tid
-            if not (tid in tid_limit):
+            flag = True
+            for l in tid_limit:
+                if tid == l.strip():
+                    flag = False
+            if flag == True:
                 continue
         r[tid] = {}
         # start to get score
         for field_key in fields:
-            field = txt[int(fields[field_key])] # can be loop here
+            field = txt[int(fields[field_key])].strip() # can be loop here
             words_count, score_rs = liwc.score(field, looks, looks_ws, show)
             rs = {'words_count':words_count, 'score':score_rs}
             r[tid][field_key] = rs
@@ -80,6 +84,40 @@ def output_score_close(fs):
     for f in fs:
         fs[f].close()
     
+def read_main(fields, looks):
+    r = {}
+    for field_key in fields:
+        f = open('output/%s.txt'%field_key, 'r')
+        i = 0
+        while 1:
+            i = i + 1
+            line = f.readline()
+            if not line:
+                break
+            if i == 1:
+                continue # the first line is a lable
+            line = line.strip()
+            scores = line.split('\t')
+            if len(scores) < 2:
+                continue
+            tid = scores[0].strip()
+            if not r.has_key(tid):
+                r[tid] = {}
+            if not r[tid].has_key(field_key):
+                r[tid][field_key] = {}
+            words_count = scores[1].strip()
+            if not r[tid][field_key].has_key('words_count'):
+                r[tid][field_key]['words_count'] = words_count
+            if not r[tid][field_key].has_key('score'):
+                r[tid][field_key]['score'] = {}
+            j = 2
+            for look in looks:
+                score = scores[j].strip()
+                if not r[tid][field_key]['score'].has_key(look):
+                    r[tid][field_key]['score'][look] = score
+                j = j + 1
+        f.close()
+    return r
 
 ## pair: bounday crossing
 def pair(pair_file_path, fields, looks, r, first_line_as_label_pair):
@@ -104,10 +142,11 @@ def pair(pair_file_path, fields, looks, r, first_line_as_label_pair):
             if i == 1:
                 line_one = '%s \t%s \n'%(line_one, line.strip())
                 continue
+        line = line.strip()
         txt = line.split('\t')
         #tid = txt[i]
-        a = txt[0] # from a -> b
-        b = txt[1]
+        a = txt[0].strip() # from a -> b
+        b = txt[1].strip()
         line_out = ''
         ## for object a
         tid = '/thing:%s'%(str(a))
