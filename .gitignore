@@ -28,8 +28,7 @@ pip-log.txt
 
 *.DS_Store
 
-dic/*
-txt/*
 *.py~
 
-output/*
+
+screenshot/*

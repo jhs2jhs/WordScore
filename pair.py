@@ -13,8 +13,8 @@ first_line_as_lable = True
 tid_column = 1
 
 ## limit into a specific array of ids, otherwise if want to look at all, simply leave it as txt_limit=[]
-#tid_limit = ['/thing:8917', '/thing:17473', '/thing:8252', '/thing:17344', '/thing:2079', '/thing:16627']
-tid_limit = [] # uncomment this line if you want to look at all raws
+tid_limit = ['/thing:8917', '/thing:17473', '/thing:8252', '/thing:17344', '/thing:2079', '/thing:16627', '/thing:10541', '/thing:17508']
+#tid_limit = [] # uncomment this line if you want to look at all raws
 
 ## which columns you want to look in your .txt file
 fields = {
@@ -52,6 +52,6 @@ r = call.get_scores(liwc_path, txt_path, first_line_as_lable, tid_column, tid_li
 call.output(fields, looks, r, output_result)
 
 lines_out = call.pair(pair_file_path, fields, looks, r, first_line_as_label_pair)
-call.pair_output(lines_out, pair_file_path)
+call.pair_output(lines_out, pair_file_path, pair_show)
     
     

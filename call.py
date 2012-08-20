@@ -151,7 +151,7 @@ def pair(pair_file_path, fields, looks, r, first_line_as_label_pair):
     print '**** end of pare ****'
     return lines_out
 
-def pair_output(lines_out, pair_file_path):
+def pair_output(lines_out, pair_file_path, pair_show):
     print '**** start to output pair ****'
     line_one = ''
     f_out_name = pair_file_path.replace('/', '')
