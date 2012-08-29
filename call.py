@@ -206,4 +206,88 @@ def pair_output(lines_out, pair_file_path, pair_show):
     f.close()
     print '**** end of output pair ****'
     
+
+## single
+def single(r, txt_path, first_line_as_label, tid_column, tid_limit, single_show, single_fields):
+    print '** start to single **'
+    i = 0
+    f = open(txt_path, 'r')
+    lines_out = {}
+    line_one = ''
+    while 1:
+        line = f.readline()
+        if not line:
+            break
+        if first_line_as_label:
+            if i == 0:
+                i = i + 1
+                continue
+        txt = line.split('\t')
+        tid = txt[tid_column].strip()
+        tid = str(tid)
+        if len(tid_limit) != 0: # if only look for specific tid
+            flag = True
+            for l in tid_limit:
+                if tid == l.strip():
+                    flag = False
+            if flag == True:
+                continue
+        if not r.has_key(tid):
+            r[tid] = {}
+        if not r[tid].has_key('single'):
+            r[tid]['single'] = {}
+        for field_key in single_fields:
+            field = txt[int(single_fields[field_key])].strip()
+            r[tid]['single'][field_key] = field
+        if single_show:
+            print tid
+            print json.dumps(r[tid]['single'], sort_keys=True, indent=2)
+            print '==============='
+    f.close()
+    print 'end of adding single'
+    return r
+
+## output process results into a local txt file. 
+def single_output(fields, looks, r, single_fields, single_output_result):
+    if single_output_result == True:
+        print '**** start to output single ****'
+        fs = single_output_score_open(fields, looks, single_fields)
+        single_output_score_process(r, fs, fields, looks, single_fields)
+        single_output_score_close(fs)
+        print '**** end of output single ****'
+
+def single_output_score_open(fields, looks, single_fields):
+    fs = {}
+    for field_key in fields:
+        f = open('output/single_%s.txt'%field_key, 'w')
+        fs[field_key] = f
+        line1 = 'tid \twords_count '
+        for look in looks:
+            line1 = '%s \t%s'%(line1, str(look))
+        for single_field in single_fields:
+            line1 = '%s \t%s'%(line1, str(single_fields))
+        line1 = '%s\n'%line1
+        f.write(line1)
+    return fs
     
+def single_output_score_process(r, fs, fields, looks, single_fields):
+    for tid in r:
+        for field_key in fields:
+            f = fs[field_key]
+            words_count = r[tid][field_key]['words_count']
+            scores = r[tid][field_key]['score']
+            singles = r[tid]['single']
+            line = '%s \t%s '%(tid, words_count)
+            for look in looks:
+                score = scores[look]
+                line = '%s \t%s'%(line, str(score))
+            for single_field in single_fields:
+                field = singles[single_field]
+                line = '%s \t%s'%(line, str(field))
+            line = '%s\n'%line
+            f.write(line)
+
+def single_output_score_close(fs):
+    for f in fs:
+        fs[f].close()
+

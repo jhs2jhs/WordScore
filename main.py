@@ -4,7 +4,7 @@
 liwc_path = 'dic/LIWC2007_ENGLISH080730.dic'
 
 ## the path of the file you want to process
-txt_path = 'txt/texts_all.txt'
+txt_path = 'txt/twitter_status_all_short_percent_100.txt'
 
 ## whether you want to ignore the first line which is lable for each column
 first_line_as_lable = True
@@ -18,8 +18,7 @@ tid_limit = [] # uncomment this line if you want to look at all raws
 
 ## which columns you want to look in your .txt file
 fields = {
-    'desc':'4',
-    'insc':'5'
+    'tweet':'2',
     }
 
 ## which categories you want to look at
@@ -34,6 +33,7 @@ looks = {
 
 ## do you want to show the process during executing code
 show = True
+show = False
 
 ## do you want to save results into txt file in /ouput folder?
 output_result = True
